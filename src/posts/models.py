@@ -2,13 +2,14 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+# from django.urls import reverse
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models.signals import pre_save
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
-
+from django.contrib.auth import get_user_model
 
 from markdown_deux import markdown
 from comments.models import Comment
@@ -34,7 +35,7 @@ def upload_location(instance, filename):
     new_id = PostModel.objects.order_by("id").last().id + 1
     """
     instance.__class__ gets the model Post. We must use this method because the model is defined below.
-    Then create a queryset ordered by the "id"s of each object, 
+    Then create a queryset ordered by the "id"s of each object,
     Then we get the last object in the queryset with `.last()`
     Which will give us the most recently created Model instance
     We add 1 to it, so we get what should be the same id as the the post we are creating.
@@ -42,13 +43,13 @@ def upload_location(instance, filename):
     return "%s/%s" %(new_id, filename)
 
 class Post(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE ,default=1)
     title = models.CharField(max_length=120)
     slug = models.SlugField(unique=True)
-    image = models.ImageField(upload_to=upload_location, 
-            null=True, 
-            blank=True, 
-            width_field="width_field", 
+    image = models.ImageField(upload_to=upload_location,
+            null=True,
+            blank=True,
+            width_field="width_field",
             height_field="height_field")
     height_field = models.IntegerField(default=0)
     width_field = models.IntegerField(default=0)
